@@ -1,25 +1,78 @@
 #include <windows.h>
 
-// int unsigned = UINT - (windows)
+#define internal static
+#define local_persist static
+#define global_variable static
 
-LRESULT CALLBACK MainWindowCallback(HWND Window, UINT Message, WPARAM WParam, LPARAM LParam) {
+global_variable bool Running;
+
+global_variable BITMAPINFO BitmapInfo;
+global_variable void* BitmapMemory;
+global_variable HBITMAP BitmapHandle;
+global_variable HDC BitmapDeviceContext;
+
+// DIB = Device Independent Bitmap
+internal void Win32ResizeDIBSection(int Width, int Height) {
+	// TODO: Bulletproof this.
+	// Maybe don't free first, free after, then free if that fails.
+
+	// TODO: Free our DIBSection
+
+
+	if (BitmapHandle) {
+		DeleteObject(BitmapHandle);
+	}
+	if (!BitmapDeviceContext) {
+		// TODO: Should we recreate these under certain special circumstances
+		BitmapDeviceContext = CreateCompatibleDC(0);
+	}
+	BitmapInfo.bmiHeader.biSize = sizeof(BitmapInfo.bmiHeader);
+	BitmapInfo.bmiHeader.biWidth = Width;
+	BitmapInfo.bmiHeader.biHeight = Height;
+	BitmapInfo.bmiHeader.biPlanes = 1;
+	BitmapInfo.bmiHeader.biBitCount = 32;
+	BitmapInfo.bmiHeader.biCompression = BI_RGB;
+
+
+	BitmapHandle = CreateDIBSection(
+		BitmapDeviceContext, &BitmapInfo,
+		DIB_RGB_COLORS,
+		&BitmapMemory,
+		0, 0);
+}
+
+internal void Win32UpdateWindow(HDC DeviceContext, int X, int Y, int Width, int Height) {
+	StretchDIBits(DeviceContext,
+		X, Y, Width, Height,
+		X, Y, Width, Height,
+		BitmapMemory,
+		&BitmapInfo,
+		DIB_RGB_COLORS, SRCCOPY);
+}
+
+
+LRESULT CALLBACK Win32MainWindowCallback(HWND Window, UINT Message, WPARAM WParam, LPARAM LParam) {
 	LRESULT Result = 0;
 
 	switch (Message) {
 	case WM_SIZE: {
-		OutputDebugStringA("WM_SIZE\n");
+		RECT ClientRect;
+		GetClientRect(Window, &ClientRect);
+		int Height = ClientRect.bottom - ClientRect.top;
+		int Width = ClientRect.right - ClientRect.left;
+		Win32ResizeDIBSection(Width, Height);
 	} break;
 
 
 	case WM_DESTROY: {
-		OutputDebugStringA("WM_DESTROY\n");
-
+		// TODO: Handle this with a message to the user?
+		Running = false;
 	} break;
 
 
 	case WM_CLOSE: {
-		OutputDebugStringA("WM_CLOSE\n");
-
+		// TODO: Handle this as an error - recreate window?
+		Running = false;
 	} break;
 
 	case WM_ACTIVATEAPP: {
@@ -31,17 +84,13 @@ LRESULT CALLBACK MainWindowCallback(HWND Window, UINT Message, WPARAM WParam, LP
 	case WM_PAINT: {
 		PAINTSTRUCT Paint;
 		HDC DeviceContext = BeginPaint(Window, &Paint);
-
 		int X = Paint.rcPaint.left;
 		int Y = Paint.rcPaint.top;
 		int Height = Paint.rcPaint.bottom - Paint.rcPaint.top;
 		int Width = Paint.rcPaint.right - Paint.rcPaint.left;
-		static DWORD Operation = WHITENESS;
+		Win32UpdateWindow(DeviceContext, X, Y, Width, Height);
+		local_persist DWORD Operation = WHITENESS;
 		PatBlt(DeviceContext, X, Y, Width, Height, Operation);
-
-		if (Operation == WHITENESS) Operation = BLACKNESS;
-		else if (Operation == BLACKNESS) Operation = WHITENESS;
-
 
 		EndPaint(Window, &Paint);
 	} break;
@@ -65,13 +114,13 @@ int CALLBACK WinMain(
 	// TODO(casey): Check if HREDRAW|VREDRAW|OWNDC still matter
 	WNDCLASS WindowClass = {};
 	WindowClass.style = CS_OWNDC | CS_HREDRAW | CS_VREDRAW; // bit field, properties that we want our window to have
-	WindowClass.lpfnWndProc = MainWindowCallback; // pointer to a function that we will define
+	WindowClass.lpfnWndProc = Win32MainWindowCallback; // pointer to a function that we will define
 	WindowClass.hInstance = Instance; // A handle to the instance that contains the window procedure for the class
 	WindowClass.lpszClassName = "HandmadeHeroWindowClass";
 	//WindowClass.hIcon = hInstance;
 
-	if (RegisterClass(&WindowClass)) {
-		HWND WindowHandle = CreateWindowEx(
+	if (RegisterClassA(&WindowClass)) {
+		HWND WindowHandle = CreateWindowExA(
 			0,
 			WindowClass.lpszClassName,
 			"Handmade Hero",
@@ -85,14 +134,14 @@ int CALLBACK WinMain(
 			Instance,
 			0 // Pass parameters to the window and get with the WM_CREATE
 		);
-
+		Running = true;
 		if (WindowHandle != NULL) {
 			MSG Message;
-			for (;;) {
-				BOOL MessageResult = GetMessage(&Message, 0, 0, 0);
+			while (Running) {
+				BOOL MessageResult = GetMessageA(&Message, 0, 0, 0);
 				if (MessageResult > 0) {
 					TranslateMessage(&Message);
-					DispatchMessage(&Message);
+					DispatchMessageA(&Message);
 				}
 				else break;
 			}
