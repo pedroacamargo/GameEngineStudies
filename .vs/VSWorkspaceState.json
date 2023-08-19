@@ -1,8 +1,9 @@
 {
   "ExpandedNodes": [
     "",
+    "\\build",
     "\\code"
   ],
-  "SelectedNode": "\\code\\build.bat",
+  "SelectedNode": "\\build\\win32_handmade.exe",
   "PreviewInSolutionExplorer": false
 }
