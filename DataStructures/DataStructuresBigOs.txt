@@ -1,0 +1,14 @@
+=====> ARRAYS BigO's <======
+- Static Array:
+
+   - lookup -> O(1)
+   - push -> O(1)
+   - insert -> O(n)
+   - delete -> O(n)
+
+- Dinamic Array:
+   - lookup -> O(1)
+   - append* -> O(1)
+   - insert -> O(n)
+   - delete -> O(n)    
+   *It can be O(n)
