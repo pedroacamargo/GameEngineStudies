@@ -95,9 +95,9 @@ internal void Win32InitDSound(HWND Window, int32 SamplesPerSecond , int32 Buffer
 			WaveFormat.wFormatTag = WAVE_FORMAT_PCM;
 			WaveFormat.nChannels = 2; // Stereo Sound
 			WaveFormat.nSamplesPerSec = SamplesPerSecond;
-			WaveFormat.nBlockAlign = (WaveFormat.nChannels * WaveFormat.wBitsPerSample) / 8;
-			WaveFormat.nAvgBytesPerSec = WaveFormat.nChannels * WaveFormat.nBlockAlign;
 			WaveFormat.wBitsPerSample = 16;
+			WaveFormat.nBlockAlign = (WaveFormat.nChannels * WaveFormat.wBitsPerSample) / 8;
+			WaveFormat.nAvgBytesPerSec = WaveFormat.nSamplesPerSec * WaveFormat.nBlockAlign;
 			WaveFormat.cbSize = 0;
 
 			// TODO: Search what's SetCooperativeLevel
@@ -111,8 +111,8 @@ internal void Win32InitDSound(HWND Window, int32 SamplesPerSecond , int32 Buffer
 				LPDIRECTSOUNDBUFFER PrimaryBuffer;
 				
 				if (SUCCEEDED(DirectSound->CreateSoundBuffer(&BufferDescription, &PrimaryBuffer, 0))) {
-
- 					if (SUCCEEDED(PrimaryBuffer->SetFormat(&WaveFormat))) {
+					HRESULT Error = PrimaryBuffer->SetFormat(&WaveFormat);
+ 					if (SUCCEEDED(Error)) {
 
 						// NOTE: We have finally set the format!
 						OutputDebugStringA("Primary Buffer format was set. \n");
@@ -121,6 +121,7 @@ internal void Win32InitDSound(HWND Window, int32 SamplesPerSecond , int32 Buffer
 					else {
 
 						// TODO: Diagnostics
+						OutputDebugStringA("Error PrimaryBuffer SetFormat &WaveFormat \n");
 
 					}
 
