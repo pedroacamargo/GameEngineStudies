@@ -49,6 +49,29 @@ public:
         }
     }
 
+    void insertElements(int value, int index) {
+        // in this function we don't replace the original number
+        if (index == capacity) {
+            push(value);
+        }
+
+        for(int i = totalNumbers; i > index; i--) {
+            arr[i] = arr[i - 1];
+        }
+
+        arr[index] = value;
+        totalNumbers++;
+    }
+
+    int pop() {
+        // Remove the last element of the array
+        int elem = arr[totalNumbers - 1];
+        totalNumbers--;
+        return elem;
+    }
+
+    
+
     void print() {
         cout << "[";
         for (int i = 0; i < totalNumbers; i++) {
