@@ -70,7 +70,21 @@ public:
         return elem;
     }
 
-    
+    int pop(int index) {
+        // Remove an element from a given index
+        if (index > -1 && index < totalNumbers) {
+            totalNumbers--;
+            for (int j = index; j < totalNumbers; j++) {
+                arr[j] = arr[j + 1];
+            }
+        }
+    }
+
+    int get(int value) {
+        if (value > -1 && value < totalNumbers) {
+            return arr[value];
+        }
+    }
 
     void print() {
         cout << "[";
