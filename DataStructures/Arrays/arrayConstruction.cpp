@@ -72,12 +72,14 @@ public:
 
     int pop(int index) {
         // Remove an element from a given index
+        int number = arr[index];
         if (index > -1 && index < totalNumbers) {
             totalNumbers--;
             for (int j = index; j < totalNumbers; j++) {
                 arr[j] = arr[j + 1];
             }
         }
+        return number;
     }
 
     int get(int index) {
@@ -106,12 +108,25 @@ public:
 };
 
 int main() {
-    DinamicArray dinArr;
+    DinamicArray a; // creating instance of the class.
+    a.push(10);
+    a.push(20);
+    a.push(30);
+    a.push(40);
+    a.insertElements(50, 2);
+    cout<<"The array is: ";
+    a.print();
 
-    dinArr.push(10);
-    dinArr.push(5);
-    dinArr.push(9);
-    dinArr.print();
+    int ele = a.pop();// removing last element
+    cout<<"Element Deleted: "<<ele<<endl;
+    cout<<"The array after deletion is: ";
+    a.print();
+
+    a.pop(0);
+    cout<<"The array after deleting index-0 element: ";
+    a.print();
+
+    cout<<"The size of array is: "<<a.length()<<endl;
 
     return 0;
 }
