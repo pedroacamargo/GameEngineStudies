@@ -80,10 +80,16 @@ public:
         }
     }
 
-    int get(int value) {
-        if (value > -1 && value < totalNumbers) {
-            return arr[value];
+    int get(int index) {
+        // returns the value in the given index
+        if (index > -1 && index < totalNumbers) {
+            return arr[index];
         }
+    }
+
+    int length() {
+        // Get the size of array
+        return totalNumbers;
     }
 
     void print() {
